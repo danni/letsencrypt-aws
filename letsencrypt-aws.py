@@ -339,9 +339,14 @@ def update_elb(logger, acme_client, force_issue, cert_request):
     days_until_expiration = (
         current_cert.not_valid_after - datetime.datetime.today()
     )
-    current_domains = current_cert.extensions.get_extension_for_class(
-        x509.SubjectAlternativeName
-    ).value.get_values_for_type(x509.DNSName)
+
+    try:
+        current_domains = current_cert.extensions.get_extension_for_class(
+            x509.SubjectAlternativeName
+        ).value.get_values_for_type(x509.DNSName)
+    except Exception:
+        current_domains = []
+
     if (
         days_until_expiration > CERTIFICATE_EXPIRATION_THRESHOLD and
         # If the set of hosts we want for our certificate changes, we update
